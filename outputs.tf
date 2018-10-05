@@ -28,11 +28,6 @@ output "instance_group_url" {
   value       = "${module.consul_servers.instance_group_url}"
 }
 
-output "client_instance_group_name" {
-  description = "The name of the Managed Instance Group that contains the Consul Client cluster."
-  value       = "${module.consul_clients.instance_group_name}"
-}
-
 output "instance_template_metadata_fingerprint" {
   description = "A hash computed by the unique combination of metadata associated with the Instance Template used by the Consul Server cluster."
   value       = "${module.consul_servers.instance_template_metadata_fingerprint}"

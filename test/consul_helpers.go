@@ -25,28 +25,20 @@ var (
 	ConsulClusterExampleVarZone    = "gcp_zone"
 
 	ConsulClusterExampleVarServerClusterName = "consul_server_cluster_name"
-	ConsulClusterExampleVarClientClusterName = "consul_client_cluster_name"
 
 	ConsulClusterExampleVarServerClusterTagName = "consul_server_cluster_tag_name"
-	ConsulClusterExampleVarClientClusterTagName = "consul_client_cluster_tag_name"
 
 	ConsulClusterExampleVarServerSourceImage = "consul_server_source_image"
-	ConsulClusterExampleVarClientSourceImage = "consul_client_source_image"
 
 	ConsulClusterExampleVarServerClusterSize = "consul_server_cluster_size"
-	ConsulClusterExampleVarClientClusterSize = "consul_client_cluster_size"
 
 	ConsulClusterExampleDefaultNumServers = 3
-	ConsulClusterExampleDefaultNumClients = 4
 
 	ConsulClusterExampleOutputServerInstanceGroupName = "instance_group_name"
-	ConsulClusterExampleOutputClientInstanceGroupName = "client_instance_group_name"
 
 	ConsulClusterServerAllowedInboundCidrBlockHttpApi = "consul_server_allowed_inbound_cidr_blocks_http_api"
 	ConsulClusterServerAllowedInboundCidrBlockDns     = "consul_server_allowed_inbound_cidr_blocks_dns"
 
-	ConsulClusterClientAllowedInboundCidrBlockHttpApi = "consul_client_allowed_inbound_cidr_blocks_http_api"
-	ConsulClusterClientAllowedInboundCidrBlockDns     = "consul_client_allowed_inbound_cidr_blocks_dns"
 
 	// Terratest var names
 	GcpProjectIdVarName = "GCPProjectID"
@@ -99,7 +91,6 @@ func runConsulClusterTest(t *testing.T, packerBuildName string, examplesFolder s
 		// GCP only supports lowercase names for some resources
 		uniqueID := strings.ToLower(random.UniqueId())
 		serverClusterName := fmt.Sprintf("consul-server-cluster-%s", uniqueID)
-		clientClusterName := fmt.Sprintf("consul-client-cluster-%s", uniqueID)
 		imageID := test_structure.LoadArtifactID(t, exampleFolder)
 
 		terraformOptions := &terraform.Options{
@@ -109,17 +100,11 @@ func runConsulClusterTest(t *testing.T, packerBuildName string, examplesFolder s
 				ConsulClusterExampleVarRegion:                     gcpRegion,
 				ConsulClusterExampleVarZone:                       gcpZone,
 				ConsulClusterExampleVarServerClusterName:          serverClusterName,
-				ConsulClusterExampleVarClientClusterName:          clientClusterName,
 				ConsulClusterExampleVarServerClusterTagName:       serverClusterName,
-				ConsulClusterExampleVarClientClusterTagName:       clientClusterName,
 				ConsulClusterExampleVarServerSourceImage:          imageID,
-				ConsulClusterExampleVarClientSourceImage:          imageID,
 				ConsulClusterExampleVarServerClusterSize:          ConsulClusterExampleDefaultNumServers,
-				ConsulClusterExampleVarClientClusterSize:          ConsulClusterExampleDefaultNumClients,
 				ConsulClusterServerAllowedInboundCidrBlockHttpApi: []string{"0.0.0.0/0"},
 				ConsulClusterServerAllowedInboundCidrBlockDns:     []string{"0.0.0.0/0"},
-				ConsulClusterClientAllowedInboundCidrBlockHttpApi: []string{"0.0.0.0/0"},
-				ConsulClusterClientAllowedInboundCidrBlockDns:     []string{"0.0.0.0/0"},
 			},
 		}
 		test_structure.SaveTerraformOptions(t, exampleFolder, terraformOptions)
@@ -136,8 +121,6 @@ func runConsulClusterTest(t *testing.T, packerBuildName string, examplesFolder s
 		// Check the Consul servers
 		checkConsulClusterIsWorking(t, ConsulClusterExampleOutputServerInstanceGroupName, terraformOptions, gcpProjectID, gcpRegion)
 
-		// Check the Consul clients
-		checkConsulClusterIsWorking(t, ConsulClusterExampleOutputClientInstanceGroupName, terraformOptions, gcpProjectID, gcpRegion)
 	})
 }
 
@@ -178,7 +161,7 @@ func testConsulCluster(t *testing.T, nodeIPAddress string) {
 	consulClient := createConsulClient(t, nodeIPAddress)
 	maxRetries := 60
 	sleepBetweenRetries := 10 * time.Second
-	expectedMembers := ConsulClusterExampleDefaultNumClients + ConsulClusterExampleDefaultNumServers
+	expectedMembers := ConsulClusterExampleDefaultNumServers
 
 	leader := retry.DoWithRetry(t, "Check Consul members", maxRetries, sleepBetweenRetries, func() (string, error) {
 		members, err := consulClient.Agent().Members(false)
