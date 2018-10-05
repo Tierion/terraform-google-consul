@@ -47,7 +47,7 @@ variable "consul_server_cluster_size" {
 
 variable "encrypt_key" {
   description = "Specifies the secret key to use for encryption of Consul network traffic. This key must be 16-bytes that are Base64-encoded"
-  defaults    = "__EMPTY__"
+  default     = "__EMPTY__"
 }
 
 variable "consul_client_cluster_size" {
