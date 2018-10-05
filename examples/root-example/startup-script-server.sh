@@ -10,4 +10,4 @@ set -e
 exec > >(tee /var/log/startup-script.log|logger -t startup-script -s 2>/dev/console) 2>&1
 
 # These variables are passed in via Terraform template interplation
-/opt/consul/bin/run-consul --server --cluster-tag-name "${cluster_tag_name}"
+/opt/consul/bin/run-consul --server --cluster-tag-name "${cluster_tag_name}" --encrypt-key "${encrypt_key}"
